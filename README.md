@@ -1,2 +1,3 @@
-# myMud
-TbaMud for my own amusement
+Files for tbaMUD.
+
+
