@@ -24,10 +24,12 @@
 #include "mail.h"         /**< For the has_mail function */
 #include "act.h"
 #include "class.h"
+#include "races.h"
 #include "fight.h"
 #include "modify.h"
 #include "asciimap.h"
 #include "quest.h"
+#include "clan.h"
 
 /* prototypes of local functions */
 /* do_diagnose utility functions */
@@ -343,8 +345,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (IS_NPC(i))
     send_to_char(ch, "%c%s", UPPER(*i->player.short_descr), i->player.short_descr + 1);
   else
+  {
     send_to_char(ch, "%s%s%s", i->player.name, *GET_TITLE(i) ? " " : "", GET_TITLE(i));
-
+    if (*get_clan_name(i)) {
+    	send_to_char(ch, " [%s]", get_clan_name(i));
+    }
+  }
   if (AFF_FLAGGED(i, AFF_INVISIBLE))
     send_to_char(ch, " (invisible)");
   if (AFF_FLAGGED(i, AFF_HIDE))
@@ -1051,7 +1057,7 @@ int search_help(const char *argument, int level)
         mid++;
       if (strn_cmp(argument, help_table[mid].keywords, minlen) || level < help_table[mid].min_level)
         break;
-        
+
       return (mid);
     }
     else if (chk > 0)
@@ -1111,7 +1117,7 @@ ACMD(do_help)
 }
 
 #define WHO_FORMAT \
-"Usage: who [minlev[-maxlev]] [-n name] [-c classlist] [-k] [-l] [-n] [-q] [-r] [-s] [-z]\r\n"
+"Usage: who [minlev[-maxlev]] [-n name] [-d racelist] [-c classlist] [-k] [-l] [-n] [-q] [-r] [-s] [-z]\r\n"
 
 /* Written by Rhade */
 ACMD(do_who)
@@ -1122,7 +1128,7 @@ ACMD(do_who)
   char name_search[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
   char mode;
   int low = 0, high = LVL_IMPL, localwho = 0, questwho = 0;
-  int showclass = 0, short_list = 0, outlaws = 0;
+  int showclass = 0, showrace = 0, short_list = 0, outlaws = 0;
   int who_room = 0, showgroup = 0, showleader = 0;
 
   struct {
@@ -1177,6 +1183,10 @@ ACMD(do_who)
         half_chop(buf1, arg, buf);
         showclass = find_class_bitvector(arg);
         break;
+      case 'd':
+	half_chop(buf1, arg, buf);
+	showrace = find_race_bitvector(arg);
+	break;
       case 'l':
         showleader = 1;
         strcpy(buf, buf1);   /* strcpy: OK (sizeof: buf1 == buf) */
@@ -1216,6 +1226,8 @@ ACMD(do_who)
       if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
         continue;
       if (showclass && !(showclass & (1 << GET_CLASS(tch))))
+        continue;
+      if (showrace && !(showrace & (1 << GET_RACE(tch))))
         continue;
       if (showgroup && !GROUP(tch))
         continue;
@@ -1261,24 +1273,29 @@ ACMD(do_who)
         continue;
       if (showclass && !(showclass & (1 << GET_CLASS(tch))))
         continue;
+      if (showrace && !(showrace & (1 << GET_RACE(tch))))
+        continue;
       if (showgroup && !GROUP(tch))
         continue;
       if (showleader && (!GROUP(tch) || GROUP_LEADER(GROUP(tch)) != tch))
         continue;
 
       if (short_list) {
-        send_to_char(ch, "%s[%2d %s] %-12.12s%s%s",
+        send_to_char(ch, "%s[%2d %s %s] %-12.12s%s%s",
           (GET_LEVEL(tch) >= LVL_IMMORT ? CCYEL(ch, C_SPR) : ""),
-          GET_LEVEL(tch), CLASS_ABBR(tch), GET_NAME(tch),
+          GET_LEVEL(tch), RACE_ABBR(tch), CLASS_ABBR(tch), GET_NAME(tch),
           CCNRM(ch, C_SPR), ((!(++num_can_see % 4)) ? "\r\n" : ""));
       } else {
         num_can_see++;
-        send_to_char(ch, "%s[%2d %s] %s%s%s%s",
+        send_to_char(ch, "%s[%2d %s %s] %s%s%s%s",
             (GET_LEVEL(tch) >= LVL_IMMORT ? CCYEL(ch, C_SPR) : ""),
-            GET_LEVEL(tch), CLASS_ABBR(tch),
+            GET_LEVEL(tch), RACE_ABBR(tch), CLASS_ABBR(tch),
             GET_NAME(tch), (*GET_TITLE(tch) ? " " : ""), GET_TITLE(tch),
             CCNRM(ch, C_SPR));
-        
+        if (*get_clan_name(tch)) {
+        	send_to_char(ch, " %s[%s]%s", CCYEL(ch, C_SPR), get_clan_name(tch), CCNRM(ch, C_SPR));
+        }
+
         if (GET_INVIS_LEV(tch))
           send_to_char(ch, " (i%d)", GET_INVIS_LEV(tch));
         else if (AFF_FLAGGED(tch, AFF_INVISIBLE))
@@ -1356,7 +1373,7 @@ ACMD(do_who)
 }
 
 #define USERS_FORMAT \
-"format: users [-l minlevel[-maxlevel]] [-n name] [-h host] [-c classlist] [-o] [-p]\r\n"
+"format: users [-l minlevel[-maxlevel]] [-n name] [-h host] [-r racelist] [-c classlist] [-o] [-p]\r\n"
 
 ACMD(do_users)
 {
@@ -1366,7 +1383,7 @@ ACMD(do_users)
   struct char_data *tch;
   struct descriptor_data *d;
   int low = 0, high = LVL_IMPL, num_can_see = 0;
-  int showclass = 0, outlaws = 0, playing = 0, deadweight = 0;
+  int showclass = 0, showrace = 0, outlaws = 0, playing = 0, deadweight = 0;
   char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
   host_search[0] = name_search[0] = '\0';
@@ -1411,6 +1428,11 @@ ACMD(do_users)
 	half_chop(buf1, arg, buf);
 	showclass = find_class_bitvector(arg);
 	break;
+      case 'r':
+	playing = 1;
+	half_chop(buf1, arg, buf);
+	showrace = find_race_bitvector(arg);
+	break;
       default:
 	send_to_char(ch, "%s", USERS_FORMAT);
 	return;
@@ -1422,7 +1444,7 @@ ACMD(do_users)
     }
   }				/* end while (parser) */
   send_to_char(ch,
-	 "Num Class   Name         State          Idl   Login\t*   Site\r\n"
+	 "Num Class|Race   Name         State          Idl   Login\t*   Site\r\n"
 	 "--- ------- ------------ -------------- ----- -------- ------------------------\r\n");
 
   one_argument(argument, arg);
@@ -1449,15 +1471,17 @@ ACMD(do_users)
         continue;
       if (showclass && !(showclass & (1 << GET_CLASS(tch))))
         continue;
+      if (showrace && !(showrace & (1 << GET_RACE(tch))))
+	continue;
       if (GET_INVIS_LEV(tch) > GET_LEVEL(ch))
         continue;
 
       if (d->original)
-	sprintf(classname, "[%2d %s]", GET_LEVEL(d->original),
-		CLASS_ABBR(d->original));
+	sprintf(classname, "[%2d %s %s]", GET_LEVEL(d->original),
+		RACE_ABBR(d->original), CLASS_ABBR(d->original));
       else
-	sprintf(classname, "[%2d %s]", GET_LEVEL(d->character),
-		CLASS_ABBR(d->character));
+	sprintf(classname, "[%2d %s %s]", GET_LEVEL(d->character),
+		RACE_ABBR(d->original), CLASS_ABBR(d->character));
     } else
       strcpy(classname, "   -   ");
 
@@ -1474,7 +1498,7 @@ ACMD(do_users)
     else
       strcpy(idletime, "     ");
 
-    sprintf(line, "%3d %-7s %-12s %-14s %-3s %-8s ", d->desc_num, classname,
+    sprintf(line, "%3d %-11s %-12s %-14s %-3s %-8s ", d->desc_num, classname,
 	d->original && d->original->player.name ? d->original->player.name :
 	d->character && d->character->player.name ? d->character->player.name :
 	"UNDEFINED",
@@ -2112,7 +2136,7 @@ ACMD(do_toggle)
       for (i=0; *arg2 && *(sector_types[i]) != '\n'; i++)
         if (is_abbrev(arg2, sector_types[i]))
           break;
-      if (*(sector_types[i]) == '\n') 
+      if (*(sector_types[i]) == '\n')
         i=0;
       GET_BUILDWALK_SECTOR(ch) = i;
       send_to_char(ch, "Default sector type is %s\r\n", sector_types[i]);
@@ -2365,9 +2389,9 @@ ACMD(do_whois)
   {
      CREATE(victim, struct char_data, 1);
      clear_char(victim);
-     
+
      new_mobile_data(victim);
-     
+
      CREATE(victim->player_specials, struct player_special_data, 1);
 
      if (load_char(buf, victim) > -1)
@@ -2383,6 +2407,9 @@ ACMD(do_whois)
   sprinttype(GET_SEX(victim), genders, buf, sizeof(buf));
   send_to_char(ch, "Name: %s %s\r\nSex: %s\r\n", GET_NAME(victim),
                    (victim->player.title ? victim->player.title : ""), buf);
+
+  sprinttype (victim->player.chrace, pc_race_types, buf, sizeof(buf));
+  send_to_char(ch, "Race: %s\r\n", buf);
 
   sprinttype (victim->player.chclass, pc_class_types, buf, sizeof(buf));
   send_to_char(ch, "Class: %s\r\n", buf);

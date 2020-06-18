@@ -30,7 +30,7 @@ const char *title_male(int chclass, int level);
 
 extern const char *class_abbrevs[];
 extern const char *pc_class_types[];
-extern const char *class_menu;
+extern const char *class_menu[];
 extern int prac_params[][NUM_CLASSES];
 extern struct guild_info_type guild_info[];
 

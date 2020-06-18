@@ -24,6 +24,7 @@
 #include "act.h"
 #include "spec_procs.h"
 #include "class.h"
+#include "races.h"
 #include "fight.h"
 #include "mail.h"  /* for has_mail() */
 #include "shop.h"

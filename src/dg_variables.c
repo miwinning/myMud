@@ -23,6 +23,7 @@
 #include "spells.h"
 #include "oasis.h"
 #include "class.h"
+#include "races.h"
 #include "quest.h"
 #include "act.h"
 #include "genobj.h"
@@ -989,7 +990,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig,
              }
           break;
         case 'r':
-          if (!str_cmp(field, "room")) {  /* in NOWHERE, return the void */
+          if (!str_cmp(field, "race"))
+            sprinttype(GET_RACE(c), pc_race_types, str, slen);
+          else if (!str_cmp(field, "room")) {  /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
             snprintf(str, slen, "%c%ld",UID_CHAR,

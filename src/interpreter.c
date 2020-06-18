@@ -27,6 +27,7 @@
 #include "act.h" /* ACMDs located within the act*.c files */
 #include "ban.h"
 #include "class.h"
+#include "races.h"
 #include "graph.h"
 #include "hedit.h"
 #include "house.h"
@@ -37,6 +38,7 @@
 #include "prefedit.h"
 #include "ibt.h"
 #include "mud_event.h"
+#include "clan.h"
 
 /* local (file scope) functions */
 static int perform_dupe_check(struct descriptor_data *d);
@@ -81,7 +83,7 @@ cpp_extern const struct command_info cmd_info[] = {
   
   /* now, the main list */
   { "at"       , "at"      , POS_DEAD    , do_at       , LVL_IMMORT, 0 },
-  { "advance"  , "adv"     , POS_DEAD    , do_advance  , LVL_GRGOD, 0 },
+  { "advance"  , "adv"     , POS_DEAD    , do_advance  , LVL_GOD, 0 },
   { "aedit"    , "aed"     , POS_DEAD    , do_oasis_aedit, LVL_GOD, 0 },
   { "alias"    , "ali"     , POS_DEAD    , do_alias    , 0, 0 },
   { "afk"      , "afk"     , POS_DEAD    , do_gen_tog  , 0, SCMD_AFK },
@@ -116,6 +118,7 @@ cpp_extern const struct command_info cmd_info[] = {
   { "changelog", "cha"     , POS_DEAD    , do_changelog, LVL_IMPL, 0 },
   { "check"    , "ch"      , POS_STANDING, do_not_here , 1, 0 },
   { "checkload", "checkl"  , POS_DEAD    , do_checkloadstatus, LVL_GOD, 0 },
+  { "clan"     , "cla"     , POS_RESTING , do_clan     , 0, 0 },
   { "close"    , "cl"      , POS_SITTING , do_gen_door , 0, SCMD_CLOSE },
   { "clear"    , "cle"     , POS_DEAD    , do_gen_ps   , 0, SCMD_CLEAR },
   { "cls"      , "cls"     , POS_DEAD    , do_gen_ps   , 0, SCMD_CLEAR },
@@ -124,6 +127,7 @@ cpp_extern const struct command_info cmd_info[] = {
   { "compact"  , "comp"    , POS_DEAD    , do_gen_tog  , 0, SCMD_COMPACT },
   { "copyover" , "copyover", POS_DEAD    , do_copyover , LVL_GRGOD, 0 },
   { "credits"  , "cred"    , POS_DEAD    , do_gen_ps   , 0, SCMD_CREDITS },
+  { "ct"       , "ct"      , POS_RESTING , do_clan_tell, 0, 0 },
 
   { "date"     , "da"      , POS_DEAD    , do_date     , LVL_IMMORT, SCMD_DATE },
   { "dc"       , "dc"      , POS_DEAD    , do_dc       , LVL_GOD, 0 },
@@ -1268,7 +1272,10 @@ int enter_player_game (struct descriptor_data *d)
   character_list = d->character;
   char_to_room(d->character, load_room);
   load_result = Crash_load(d->character);
-  
+
+  /* set a clan, if applicable */
+  add_existing_clan(d->character);
+
   /* Save the character and their object file */
   save_char(d->character);
   Crash_crashsave(d->character);
@@ -1603,16 +1610,37 @@ void nanny(struct descriptor_data *d, char *arg)
       return;
     }
 
-    write_to_output(d, "%s\r\nClass: ", class_menu);
+    write_to_output(d, "%s\r\nRace: ", race_menu);
+    STATE(d) = CON_QRACE;
+    break;
+
+  case CON_QRACE:
+    load_result = parse_race(*arg);
+    if (load_result == RACE_UNDEFINED) {
+      write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
+      return;
+    } else
+      GET_RACE(d->character) = load_result;
+
+    write_to_output(d, "\r\nSelect a class:\r\n");
+
+    int i;
+    for (i = 0; i < NUM_CLASSES; i++) {
+        if (classRaceAllowed[(int) GET_RACE(d->character)][i])
+            write_to_output(d, "%s", class_menu[i]);
+    }
+        write_to_output(d, "\r\nClass: ");
+        
     STATE(d) = CON_QCLASS;
     break;
 
   case CON_QCLASS:
     load_result = parse_class(*arg);
-    if (load_result == CLASS_UNDEFINED) {
+    if (load_result == CLASS_UNDEFINED || !classRaceAllowed[GET_RACE(d->character)][load_result]) {
       write_to_output(d, "\r\nThat's not a class.\r\nClass: ");
       return;
-    } else
+    }
+    
       GET_CLASS(d->character) = load_result;
 
       if (d->olc) {

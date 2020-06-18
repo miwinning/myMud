@@ -42,13 +42,10 @@ const char *pc_class_types[] = {
 };
 
 /* The menu for choosing a class in interpreter.c: */
-const char *class_menu =
-"\r\n"
-"Select a class:\r\n"
-"  [\t(C\t)]leric\r\n"
-"  [\t(T\t)]hief\r\n"
-"  [\t(W\t)]arrior\r\n"
-"  [\t(M\t)]agic-user\r\n";
+const char *class_menu[] = {
+    "  [M]agic-user\r\n", "  [C]leric\r\n", "  [T]hief\r\n",
+    "  [W]arrior\r\n"
+    };
 
 /* The code to interpret a class letter -- used in interpreter.c when a new
  * character is selecting a class and by 'set class' in act.wizard.c. */
@@ -59,8 +56,8 @@ int parse_class(char arg)
   switch (arg) {
   case 'm': return CLASS_MAGIC_USER;
   case 'c': return CLASS_CLERIC;
-  case 'w': return CLASS_WARRIOR;
   case 't': return CLASS_THIEF;
+  case 'w': return CLASS_WARRIOR;
   default:  return CLASS_UNDEFINED;
   }
 }
@@ -1406,6 +1403,28 @@ void roll_real_abils(struct char_data *ch)
       ch->real_abils.str_add = rand_number(0, 100);
     break;
   }
+
+  switch (GET_RACE(ch)) {
+  case RACE_HUMAN:
+    break;
+  case RACE_ELF:
+    ch->real_abils.dex += 1;
+    ch->real_abils.con -= 1;
+    break;
+  case RACE_GNOME:
+    ch->real_abils.intel += 1;
+    ch->real_abils.wis -= 1;
+    break;
+  case RACE_DWARF:
+    ch->real_abils.con += 1;
+    ch->real_abils.cha -= 1;
+    break;
+  case RACE_HALFLING:
+    ch->real_abils.dex += 1;
+    ch->real_abils.str -= 1;
+    break;
+  }
+
   ch->aff_abils = ch->real_abils;
 }
 
@@ -2096,4 +2115,3 @@ const char *title_female(int chclass, int level)
   /* Default title for classes which do not have titles defined */
   return "the Classless";
 }
-

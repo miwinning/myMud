@@ -39,6 +39,7 @@
 #include "msgedit.h"
 #include "screen.h"
 #include <sys/stat.h>
+#include "clan.h"
 
 /*  declarations of most of the 'global' variables */
 struct config_data config_info; /* Game configuration list.	 */
@@ -665,6 +666,7 @@ void destroy_db(void)
   /* Events */
   event_free_all();
 
+  free_clans();
 }
 
 /* body of the booting system */
@@ -715,6 +717,9 @@ void boot_db(void)
     log("Cleaning out inactive pfiles.");
     clean_pfiles();
   }
+
+  log("Loading clans");
+  load_clans();
 
   log("Loading fight messages.");
   load_messages();

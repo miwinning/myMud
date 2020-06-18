@@ -291,40 +291,16 @@ const char *affected_bits[] =
  * @pre Must be in the same order as the defines.
  * Must end array with a single newline. */
 const char *connected_types[] = {
-  "Playing",
-  "Disconnecting",
-  "Get name",
-  "Confirm name",
-  "Get password",
-  "Get new PW",
-  "Confirm new PW",
-  "Select sex",
-  "Select class",
-  "Reading MOTD",
-  "Main Menu",
-  "Get descript.",
-  "Changing PW 1",
-  "Changing PW 2",
-  "Changing PW 3",
-  "Self-Delete 1",
-  "Self-Delete 2",
-  "Disconnecting",
-  "Object edit",
-  "Room edit",
-  "Zone edit",
-  "Mobile edit",
-  "Shop edit",
-  "Text edit",
-  "Config edit",
-  "Social edit",
-  "Trigger edit",
-  "Help edit",
-  "Quest edit",
-  "Preference edit",
-  "IBT edit",
-  "Message edit",
-  "Protocol Detection",
-  "\n"
+    "Playing", "Disconnecting", "Get name", "Confirm name", "Get password",
+    "Get new PW", "Confirm new PW", "Select sex", "Select class",
+    "Reading MOTD", "Main Menu", "Get descript.", "Changing PW 1",
+    "Changing PW 2", "Changing PW 3", "Self-Delete 1", "Self-Delete 2",
+    "Disconnecting", "Object edit", "Room edit", "Zone edit", "Mobile edit",
+    "Shop edit", "Text edit", "Config edit", "Social edit", "Trigger edit",
+    "Help edit", "Quest edit", "Preference edit", "IBT edit", "Message edit",
+    "Protocol Detection",
+    "Select race",
+    "\n"
 };
 
 /** Describes the position in the equipment listing.
@@ -451,6 +427,11 @@ const char *extra_bits[] = {
   "ANTI_WARRIOR",
   "NO_SELL",
   "QUEST_ITEM",
+  "ANTI_HUMAN",
+  "ANTI_ELF",
+  "ANTI_GNOME",
+  "ANTI_DWARF",
+  "ANTI_HALFLING",
   "\n"
 };
 
@@ -953,6 +934,7 @@ const char *ibt_bits[] = {
   "InProgress",
   "\n"
 };
+
 /* --- End of constants arrays. --- */
 
 /* Various arrays we count so we can check the world files.  These
@@ -967,4 +949,3 @@ const char *ibt_bits[] = {
 	extra_bits_count = sizeof(extra_bits) / sizeof(extra_bits[0]) - 1,
 	/** Number of defined wear bit descriptions. */
 	wear_bits_count = sizeof(wear_bits) / sizeof(wear_bits[0]) - 1;
-
