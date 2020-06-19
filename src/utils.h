@@ -1149,4 +1149,32 @@ void char_from_furniture(struct char_data *ch);
 /** What is the minimum level character to put on the wizlist? */
 #define CONFIG_MIN_WIZLIST_LEV config_info.autowiz.min_wizlist_lev
 
+/* General use directory functions & structures. Required due to */
+/* various differences between directory handling code on        */
+/* different OS'es.  Needs solid testing though.                 */
+/* Added by Dynamic Boards v2.4 - PjD (dughi@imaxx.net)          */
+
+#ifdef CIRCLE_UNIX
+#include <dirent.h>
+
+struct xap_dir {
+  int total, current;
+  struct dirent **namelist;
+};
+
+#elif defined(CIRCLE_WINDOWS)
+
+struct xap_dir {
+  int total, current;
+  char **namelist;
+};
+#endif
+
+int xdir_scan(const char *dir_name, struct xap_dir *xapdirp);
+int xdir_get_total(struct xap_dir *xd);
+char *xdir_get_name(struct xap_dir *xd, int num);
+char *xdir_next(struct xap_dir *xd);
+void xdir_close(struct xap_dir *xd);
+int insure_directory(char *path, int isfile);
+
 #endif /* _UTILS_H_ */

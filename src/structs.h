@@ -267,6 +267,7 @@
 #define PRF_AUTOKEY 32    /**< Automatically unlock locked doors when opening */
 #define PRF_AUTODOOR 33   /**< Use the next available door */
 #define PRF_ZONERESETS 34
+#define PRF_VIEWORDER (1 << 35) /* If you want to see the newest first*/
 /** Total number of available PRF flags */
 #define NUM_PRF_FLAGS 35
 
@@ -390,8 +391,9 @@
 #define ITEM_PEN 21       /**< Item is a pen		*/
 #define ITEM_BOAT 22      /**< Item is a boat		*/
 #define ITEM_FOUNTAIN 23  /**< Item is a fountain		*/
+#define ITEM_BOARD 24     /* Item is a board              */
 /** Total number of item types.*/
-#define NUM_ITEM_TYPES 24
+#define NUM_ITEM_TYPES 25
 
 /* Take/Wear flags: used by obj_data.obj_flags.wear_flags */
 #define ITEM_WEAR_TAKE 0   /**< Item can be taken */
@@ -622,10 +624,12 @@
 #define MAX_COMPLETED_QUESTS                                                   \
   1024 /**< Maximum number of completed quests allowed */
 
-#define MAX_GOLD 2140000000 /**< Maximum possible on hand gold (2.14 Billion)  \
-                             */
-#define MAX_BANK 2140000000 /**< Maximum possible in bank gold (2.14 Billion)  \
-                             */
+#define MAX_GOLD                                                               \
+  2140000000 /**< Maximum possible on hand gold (2.14 Billion)                 \
+              */
+#define MAX_BANK                                                               \
+  2140000000 /**< Maximum possible in bank gold (2.14 Billion)                 \
+              */
 
 /** Define the largest set of commands for a trigger.
  * 16k should be plenty and then some. */

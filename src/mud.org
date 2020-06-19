@@ -1,0 +1,11 @@
+#+TITLE: Mud
+
+* Stuff to add[0/2]
+ - [ ] Clan bank.
+ - [ ]
+
+* Stuff to make better[0/2]
+ - [ ] Color in boards.
+ - [ ] Color in clans.
+
+* Stuff to fix

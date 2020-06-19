@@ -682,7 +682,6 @@ void add_existing_clan(struct char_data *ch) {
  */
 void free_clans() {
   struct clan_data *current_clan_data = clan_list, *next_item;
-  log("free clans");
   while (current_clan_data) {
     next_item = current_clan_data->next;
     free_clan(current_clan_data);
@@ -790,7 +789,6 @@ static void save_clans() {
 static void free_clan(struct clan_data *clan) {
   int i;
   struct clan_member_data *member, *next_member;
-  log("free clan");
   free(clan->name);
   for (i = 0; i < NUM_CLAN_RANKS; i++)
     if (clan->rank_names[i] != clan_rank_default_names[i])
@@ -804,7 +802,6 @@ static void free_clan(struct clan_data *clan) {
     member = next_member;
   }
   free(clan);
-  log("end free clan");
 }
 
 /*

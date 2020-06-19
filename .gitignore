@@ -3,6 +3,7 @@ log/*
 lib/plrfiles/*
 lib/plrobjs/*
 lib/plrvars/*
+lib/etc/boards/*
 CMakeFiles/*
 lib/etc/*
 Makefile
